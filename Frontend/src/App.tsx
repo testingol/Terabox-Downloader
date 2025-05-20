@@ -111,6 +111,10 @@ function App() {
                 <HistorySection onSelectFile={setCurrentFile} />
               </div>
             </div>
+            <a href='https://github.com/0xarchit/Terabox-Downloader' target='_blank' rel='noopener noreferrer'>
+                <div className="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-foreground/50">
+                  Developed by 0xarchit • Source: github.com/0xarchit/Terabox-Downloader
+                </div></a>
           </motion.div>
         </main>
         <Toaster />
