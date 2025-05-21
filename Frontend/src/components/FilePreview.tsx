@@ -56,6 +56,7 @@ export default function FilePreview({ file }: FilePreviewProps) {
                 {isVideo && (
                   <video
                     src={file.proxy_url}
+                    poster={file.thumbnail}
                     controls
                     className="w-full h-full object-contain"
                     onLoadedData={handleLoad}
