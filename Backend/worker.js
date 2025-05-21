@@ -1,4 +1,4 @@
-const COOKIE = "<YOUR_COOKIE_HERE>"; // Replace with your actual cookie
+const COOKIE = "<your_cookie>" // Replace with your actual cookie
 
 const HEADERS = {
   "Accept": "application/json, text/plain, */*",
@@ -114,29 +114,50 @@ async function getFileInfo(link, request) {
   }
 }
 
-async function proxyDownload(url, fileName) {
+async function proxyDownload(url, fileName, request) {
   try {
+    // Copy headers from the original request
+    const headers = new Headers(DL_HEADERS);
+    
+    // Handle range requests
+    const rangeHeader = request.headers.get('Range');
+    if (rangeHeader) {
+      headers.set('Range', rangeHeader);
+    }
+
     const response = await fetch(url, {
-      headers: DL_HEADERS,
+      headers,
       redirect: 'follow',
     });
 
-    if (!response.ok) {
+    if (!response.ok && response.status !== 206) {
       return new Response(JSON.stringify({ error: `Failed to fetch download: ${response.status}` }), {
         status: 502,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    const cacheHeaders = {
+    // Copy response headers for proper streaming and seeking
+    const responseHeaders = new Headers({
       'Cache-Control': 'public, max-age=3600',
       'Content-Type': response.headers.get('Content-Type') || 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
-    };
+      'Content-Disposition': `inline; filename="${encodeURIComponent(fileName)}"`,
+      'Accept-Ranges': 'bytes'
+    });
+    
+    // Copy content range header if it exists (for partial content response)
+    if (response.headers.has('Content-Range')) {
+      responseHeaders.set('Content-Range', response.headers.get('Content-Range'));
+    }
+    
+    // Copy content length if it exists
+    if (response.headers.has('Content-Length')) {
+      responseHeaders.set('Content-Length', response.headers.get('Content-Length'));
+    }
 
     return new Response(response.body, {
       status: response.status,
-      headers: cacheHeaders,
+      headers: responseHeaders,
     });
   } catch (error) {
     return new Response(JSON.stringify({ error: `Proxy error: ${error.message}` }), {
@@ -148,9 +169,10 @@ async function proxyDownload(url, fileName) {
 
 // Add CORS headers for cross-origin requests
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "https://teraboxdown.pages.dev",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type"
+  "Access-Control-Allow-Headers": "Content-Type,Range",
+  "Access-Control-Expose-Headers": "Content-Length,Content-Range"
 };
 
 export default {
@@ -183,9 +205,7 @@ export default {
           headers: { "Content-Type": "application/json", ...CORS_HEADERS }
         });
       }
-    }
-
-    if (request.method === "GET" && url.pathname === "/proxy") {
+    }    if (request.method === "GET" && url.pathname === "/proxy") {
       const downloadUrl = url.searchParams.get("url");
       const fileName = url.searchParams.get("file_name") || "download";
       if (!downloadUrl) {
@@ -195,11 +215,12 @@ export default {
         });
       }
 
-      const proxyResponse = await proxyDownload(downloadUrl, fileName);
+      const proxyResponse = await proxyDownload(downloadUrl, fileName, request);
       // Ensure CORS headers on proxied download response
       proxyResponse.headers.set("Access-Control-Allow-Origin", "*");
       proxyResponse.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-      proxyResponse.headers.set("Access-Control-Allow-Headers", "Content-Type");
+      proxyResponse.headers.set("Access-Control-Allow-Headers", "Content-Type,Range");
+      proxyResponse.headers.set("Access-Control-Expose-Headers", "Content-Length,Content-Range");
       return proxyResponse;
     }
 

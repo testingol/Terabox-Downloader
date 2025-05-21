@@ -4,6 +4,7 @@ import { File, FileAudio, FileBadge } from 'lucide-react';
 import { TeraboxFile } from '@/types/terabox';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getMimeType } from '@/lib/getMimeType';
 
 interface FilePreviewProps {
   file: TeraboxFile;
@@ -14,6 +15,7 @@ export default function FilePreview({ file }: FilePreviewProps) {
   const [previewError, setPreviewError] = useState(false);
   
   const fileExtension = file.file_name.split('.').pop()?.toLowerCase() || '';
+  const mimeType = file.mime_type || getMimeType(file.file_name);
   
   const isVideo = ['mp4', 'webm', 'mov'].includes(fileExtension);
   const isAudio = ['mp3', 'wav', 'ogg'].includes(fileExtension);
@@ -58,10 +60,17 @@ export default function FilePreview({ file }: FilePreviewProps) {
                     src={file.proxy_url}
                     poster={file.thumbnail}
                     controls
+                    preload="metadata"
+                    controlsList="nodownload"
                     className="w-full h-full object-contain"
                     onLoadedData={handleLoad}
                     onError={handleError}
-                  />
+                    crossOrigin="anonymous"
+                    playsInline
+                  >
+                    <source src={file.proxy_url} type={mimeType} />
+                    Your browser does not support the video tag.
+                  </video>
                 )}
                 
                 {isAudio && (

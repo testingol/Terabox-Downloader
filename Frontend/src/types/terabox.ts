@@ -5,4 +5,6 @@ export interface TeraboxFile {
   proxy_url: string;
   thumbnail?: string;
   fetchedAt?: string;
+  size_bytes?: number; // Added for tracking actual size
+  mime_type?: string; // Added for setting proper media types
 }
