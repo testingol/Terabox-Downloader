@@ -133,6 +133,12 @@ export default function HistorySection({ onSelectFile }: HistorySectionProps) {
                             </AccordionTrigger>
                             <AccordionContent className="pb-4 pt-2 px-11">
                               <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                                <div className="w-full text-xs text-muted-foreground break-all px-2">
+                                  <span className="font-medium">Link: </span>
+                                  <a href={item.sourceLink} target="_blank" rel="noopener noreferrer" className="underline">
+                                    {item.sourceLink}
+                                  </a>
+                                </div>
                                 <Button
                                   size="sm"
                                   onClick={() => onSelectFile(item)}

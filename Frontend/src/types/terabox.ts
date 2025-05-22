@@ -7,4 +7,5 @@ export interface TeraboxFile {
   fetchedAt?: string;
   size_bytes?: number; // Added for tracking actual size
   mime_type?: string; // Added for setting proper media types
+  sourceLink?: string; // Original Terabox link used to fetch this file
 }

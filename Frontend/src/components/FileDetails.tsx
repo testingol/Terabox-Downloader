@@ -1,4 +1,3 @@
-'use client'; // Ensure client-side rendering for Next.js compatibility
 import { motion } from 'framer-motion';
 import { Download, Copy, Check } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,12 +16,25 @@ interface FileDetailsProps {
 export default function FileDetails({ file }: FileDetailsProps) {
   const { theme } = useTheme() || { theme: 'light' }; // Fallback for theme context
   const [copied, setCopied] = useState(false);
+  const [copiedSource, setCopiedSource] = useState(false);
 
   useEffect(() => {
     console.log('Current Theme:', theme);
     console.log('Copy Icon Rendered:', !!Copy);
     console.log('Check Icon Rendered:', !!Check);
   }, [theme]);
+
+  const handleCopySource = async () => {
+    try {
+      if (file.sourceLink) {
+        await navigator.clipboard.writeText(file.sourceLink);
+        setCopiedSource(true);
+        setTimeout(() => setCopiedSource(false), 2000);
+      }
+    } catch (error) {
+      console.error('Copy original link failed:', error);
+    }
+  };
 
   const handleCopy = async () => {
     try {
@@ -62,6 +74,31 @@ export default function FileDetails({ file }: FileDetailsProps) {
         </CardContent>
 
         <CardFooter className="flex flex-col sm:flex-row gap-4 p-6 justify-center items-center">
+          {/* Display original Terabox link and copy button */}
+          <div className="w-full sm:w-auto text-sm text-muted-foreground text-center sm:text-left break-all">
+            <span>Original Link: </span>
+            <a
+              href={file.sourceLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              {file.sourceLink}
+            </a>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopySource}
+            className="w-full sm:w-auto"
+          >
+            {copiedSource ? (
+              <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+            ) : (
+              <Copy className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+            )}
+            <span className="ml-2">Copy Link</span>
+          </Button>
           <Button
             className="relative w-full sm:w-auto flex-1 bg-green-600 hover:bg-green-700 text-white gap-2"
             onClick={() => window.open(file.proxy_url, '_blank')}

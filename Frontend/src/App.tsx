@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import Navbar from './components/Navbar';
@@ -25,9 +25,20 @@ const containerVariants = {
 function App() {
   const [currentFile, setCurrentFile] = useState<TeraboxFile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  // session-only cache for file details to avoid re-fetching same link
+  const sessionCache = useRef<Record<string, TeraboxFile>>({});
   const { toast } = useToast();
 
   const handleFetchFile = async (link: string) => {
+    // return cached file for this session if available
+    if (sessionCache.current[link]) {
+      setCurrentFile(sessionCache.current[link]);
+      toast({
+        title: "Loaded from cache",
+        description: "Using cached file details for this session.",
+      });
+      return;
+    }
     setIsLoading(true);
     try {
       // Choose endpoint: dev uses Vite proxy, prod uses Cloudflare Worker URL
@@ -46,15 +57,19 @@ function App() {
       }
       
       const data = await response.json();
-      setCurrentFile(data);
-      
+      // enrich response with original link and timestamp
+      const fetchedAt = new Date().toISOString();
+      const fileWithSource = { ...data, sourceLink: link, fetchedAt };
+      // set current file including sourceLink and fetchedAt
+      setCurrentFile(fileWithSource);
+      // store in session cache
+      sessionCache.current[link] = fileWithSource;
       // Add to history in localStorage
       const history = JSON.parse(localStorage.getItem('terabox-history') || '[]');
       const newHistory = [
-        { ...data, fetchedAt: new Date().toISOString() },
+        fileWithSource,
         ...history.filter((item: TeraboxFile) => item.file_name !== data.file_name),
       ].slice(0, 10); // Keep only 10 most recent
-      
       localStorage.setItem('terabox-history', JSON.stringify(newHistory));
       
       toast({
