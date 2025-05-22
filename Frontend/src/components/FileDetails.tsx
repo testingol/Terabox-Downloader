@@ -52,11 +52,11 @@ export default function FileDetails({ file }: FileDetailsProps) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-hidden w-full">
         <CardHeader className="bg-primary/5">
           <div className="flex items-start justify-between">
             <div>
-              <CardTitle className="text-xl font-semibold truncate pr-4">
+              <CardTitle className="text-xl font-semibold pr-4 break-words whitespace-normal">
                 {file.file_name}
               </CardTitle>
               <div className="flex items-center gap-2 mt-1">
@@ -69,23 +69,21 @@ export default function FileDetails({ file }: FileDetailsProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="p-0">
+        <CardContent className="p-0 w-full overflow-x-hidden">
           <FilePreview file={file} />
         </CardContent>
 
-        <CardFooter className="flex flex-col gap-4 p-6">
+        <CardFooter className="flex flex-col gap-4 p-4 sm:p-6 overflow-x-hidden">
           {/* Row 1: Original link and copy button */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
-            <div className="flex-1 text-sm text-muted-foreground break-all overflow-x-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full overflow-x-hidden">
+            <div className="flex-1 text-sm text-muted-foreground break-all">
               <span className="font-medium">Original Link: </span>
               <a
                 href={file.sourceLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline"
-              >
-                {file.sourceLink}
-              </a>
+                className="underline break-all"
+              >{file.sourceLink}</a>
             </div>
             <Button
               variant="outline"

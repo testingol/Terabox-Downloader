@@ -92,7 +92,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="terabox-theme">
-      <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
+      <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden overflow-y-auto">
         <Navbar />
         <main className="container mx-auto px-4 md:px-6 py-6 md:py-8">
           <motion.div
@@ -126,10 +126,11 @@ function App() {
                 <HistorySection onSelectFile={setCurrentFile} />
               </div>
             </div>
-            <a href='https://github.com/0xarchit/Terabox-Downloader' target='_blank' rel='noopener noreferrer'>
-                <div className="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-foreground/50">
-                  Developed by 0xarchit • Source: github.com/0xarchit/Terabox-Downloader
-                </div></a>
+            <a href='https://github.com/0xarchit/Terabox-Downloader' target='_blank' rel='noopener noreferrer' className="w-full">
+              <div className="fixed bottom-2 left-1/2 -translate-x-1/2 px-4 text-xs text-foreground/50 break-words text-center">
+                Developed by 0xarchit • Source: github.com/0xarchit/Terabox-Downloader
+              </div>
+            </a>
           </motion.div>
         </main>
         <Toaster />
