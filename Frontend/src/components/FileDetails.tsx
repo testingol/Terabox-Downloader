@@ -73,64 +73,69 @@ export default function FileDetails({ file }: FileDetailsProps) {
           <FilePreview file={file} />
         </CardContent>
 
-        <CardFooter className="flex flex-col sm:flex-row gap-4 p-6 justify-center items-center">
-          {/* Display original Terabox link and copy button */}
-          <div className="w-full sm:w-auto text-sm text-muted-foreground text-center sm:text-left break-all">
-            <span>Original Link: </span>
-            <a
-              href={file.sourceLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
+        <CardFooter className="flex flex-col gap-4 p-6">
+          {/* Row 1: Original link and copy button */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
+            <div className="flex-1 text-sm text-muted-foreground break-all overflow-x-auto">
+              <span className="font-medium">Original Link: </span>
+              <a
+                href={file.sourceLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                {file.sourceLink}
+              </a>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopySource}
+              className="w-full sm:w-auto"
             >
-              {file.sourceLink}
-            </a>
+              {copiedSource ? (
+                <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+              ) : (
+                <Copy className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+              )}
+              <span className="ml-2">Copy Link</span>
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopySource}
-            className="w-full sm:w-auto"
-          >
-            {copiedSource ? (
-              <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-            ) : (
-              <Copy className="h-4 w-4 text-gray-700 dark:text-gray-300" />
-            )}
-            <span className="ml-2">Copy Link</span>
-          </Button>
-          <Button
-            className="relative w-full sm:w-auto flex-1 bg-green-600 hover:bg-green-700 text-white gap-2"
-            onClick={() => window.open(file.proxy_url, '_blank')}
-          >
-            <Download className="w-4 h-4" />
-            Download
-            <motion.div
-              className="absolute inset-0 rounded-md bg-white"
-              initial={{ scale: 0, opacity: 0 }}
-              whileTap={{ scale: 1, opacity: 0.3 }}
-              transition={{ duration: 0.2 }}
-            />
-          </Button>
-
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={handleCopy}
-            className="ml-4"
-          >
-            {copied ? (
-              <Check
-                className="h-4 w-4 text-green-600 dark:text-green-400"
-                style={{ stroke: 'currentColor', strokeWidth: '2' }}
+          {/* Row 2: Download and proxy copy buttons */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 w-full">
+            <Button
+              className="relative w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white gap-2"
+              onClick={() => window.open(file.proxy_url, '_blank')}
+            >
+              <Download className="w-4 h-4" />
+              Download
+              <motion.div
+                className="absolute inset-0 rounded-md bg-white"
+                initial={{ scale: 0, opacity: 0 }}
+                whileTap={{ scale: 1, opacity: 0.3 }}
+                transition={{ duration: 0.2 }}
               />
-            ) : (
-              <Copy
-                className="h-4 w-4 text-gray-700 dark:text-gray-300"
-                style={{ stroke: 'currentColor', strokeWidth: '2' }}
-              />
-            )}
-          </Button>
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={handleCopy}
+              className="w-full sm:w-auto"
+            >
+              {copied ? (
+                <Check
+                  className="h-4 w-4 text-green-600 dark:text-green-400"
+                  style={{ stroke: 'currentColor', strokeWidth: '2' }}
+                />
+              ) : (
+                <Copy
+                  className="h-4 w-4 text-gray-700 dark:text-gray-300"
+                  style={{ stroke: 'currentColor', strokeWidth: '2' }}
+                />
+              )}
+              <span className="sr-only">Copy Proxy URL</span>
+            </Button>
+          </div>
         </CardFooter>
       </Card>
     </motion.div>

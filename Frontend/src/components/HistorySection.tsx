@@ -1,4 +1,3 @@
-'use client'; // Ensure client-side rendering for Next.js compatibility
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { History, ChevronDown, ChevronUp, FileIcon, Calendar, Trash } from 'lucide-react';
@@ -7,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { TeraboxFile } from '@/types/terabox';
 import { formatDistanceToNow } from 'date-fns';
 import { formatFileSize } from '@/lib/formatFileSize';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from './theme-provider';
 
 interface HistorySectionProps {
@@ -86,7 +85,7 @@ export default function HistorySection({ onSelectFile }: HistorySectionProps) {
               <CardContent className="pt-3 pb-4 px-0">
                 {history.length > 0 ? (
                   <>
-                    <div className="flex justify-center px-6 mb-2">
+                    <div className="flex justify-center px-4 mb-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -100,64 +99,57 @@ export default function HistorySection({ onSelectFile }: HistorySectionProps) {
                         Clear History
                       </Button>
                     </div>
-                    <ScrollArea className="max-h-[400px]">
-                      <Accordion type="multiple" className="px-0">
-                        {history.map((item, index) => (
-                          <AccordionItem
-                            key={`${item.file_name}-${index}`}
-                            value={`${item.file_name}-${index}`}
-                            className="border-b last:border-b-0 px-3"
-                          >
-                            <AccordionTrigger className="px-3 py-3 hover:bg-muted/30 rounded-md hover:no-underline">
-                              <div className="flex items-center w-full text-left">
-                                <div className="mr-3">
-                                  <FileIcon className="h-5 w-5 text-foreground" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-medium truncate">
-                                    {item.file_name}
+                    <div className="max-h-[300px] overflow-y-auto px-4">
+                      <ScrollArea className="h-[40vh] sm:h-[60vh] px-4">
+                        <Accordion type="multiple" className="space-y-2">
+                          {history.map((item, index) => (
+                            <AccordionItem
+                              key={`${item.file_name}-${index}`} 
+                              value={`${item.file_name}-${index}`} 
+                              className="border rounded-md"
+                            >
+                              <AccordionTrigger className="px-4 py-3 hover:bg-muted/30 rounded-md">
+                                <div className="flex items-center w-full text-left">
+                                  <div className="mr-3">
+                                    <FileIcon className="h-5 w-5 text-foreground" />
                                   </div>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                    <span className="flex items-center">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium truncate">
+                                      {item.file_name}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                       <Badge variant="outline" className="text-xs">
                                         {formatFileSize(item.file_size)}
                                       </Badge>
-                                    </span>
-                                    <span className="flex items-center">
-                                      <Calendar className="h-3 w-3 mr-1 text-foreground" />
+                                      <Calendar className="h-3 w-3 text-foreground" />
                                       {item.fetchedAt && formatDistanceToNow(new Date(item.fetchedAt), { addSuffix: true })}
-                                    </span>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pb-4 pt-2 px-11">
-                              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                                <div className="w-full text-xs text-muted-foreground break-all px-2">
-                                  <span className="font-medium">Link: </span>
-                                  <a href={item.sourceLink} target="_blank" rel="noopener noreferrer" className="underline">
-                                    {item.sourceLink}
-                                  </a>
+                              </AccordionTrigger>
+                              <AccordionContent className="pt-2 pb-4 px-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                  <div className="text-xs sm:text-sm text-muted-foreground break-all w-full sm:w-2/3">
+                                    <span className="font-medium">Link: </span>
+                                    <a href={item.sourceLink} target="_blank" rel="noopener noreferrer" className="underline break-all">
+                                      {item.sourceLink}
+                                    </a>
+                                  </div>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                                    <Button size="sm" className="w-full sm:w-auto" onClick={() => onSelectFile(item)}>
+                                      Load File
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => removeHistoryItem(index)}>
+                                      Remove
+                                    </Button>
+                                  </div>
                                 </div>
-                                <Button
-                                  size="sm"
-                                  onClick={() => onSelectFile(item)}
-                                >
-                                  Load File
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => removeHistoryItem(index)}
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
-                    </ScrollArea>
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+                      </ScrollArea>
+                    </div>
                   </>
                 ) : (
                   <div className="px-6">

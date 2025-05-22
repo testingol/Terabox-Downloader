@@ -92,7 +92,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="terabox-theme">
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
         <Navbar />
         <main className="container mx-auto px-4 md:px-6 py-6 md:py-8">
           <motion.div
