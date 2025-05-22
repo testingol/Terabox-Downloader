@@ -4,7 +4,6 @@ import { Search, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 
 interface TeraboxFormProps {
   onSubmit: (link: string) => Promise<void>;
@@ -13,29 +12,9 @@ interface TeraboxFormProps {
 
 export default function TeraboxForm({ onSubmit, isLoading }: TeraboxFormProps) {
   const [link, setLink] = useState('');
-  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!link.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid Terabox link",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!link.includes('terabox')) {
-      toast({
-        title: "Warning",
-        description: "Link doesn't appear to be a Terabox link. Please check and try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     onSubmit(link);
   };
 
