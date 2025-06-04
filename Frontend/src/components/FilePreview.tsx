@@ -20,7 +20,8 @@ export default function FilePreview({ file }: FilePreviewProps) {
   const isVideo = ['mp4', 'webm', 'mov'].includes(fileExtension);
   const isAudio = ['mp3', 'wav', 'ogg'].includes(fileExtension);
   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
-  const canPreview = isVideo || isAudio || isImage;
+  const isPdf = fileExtension === 'pdf';
+  const canPreview = isVideo || isAudio || isImage || isPdf;
   
   useEffect(() => {
     setLoading(true);
@@ -100,6 +101,16 @@ export default function FilePreview({ file }: FilePreviewProps) {
                     src={file.proxy_url}
                     alt={file.file_name}
                     className="w-full h-full object-contain"
+                    onLoad={handleLoad}
+                    onError={handleError}
+                  />
+                )}
+                
+                {isPdf && (
+                  <iframe
+                    src={file.proxy_url}
+                    title="PDF Preview"
+                    className="w-full h-full border-0"
                     onLoad={handleLoad}
                     onError={handleError}
                   />
