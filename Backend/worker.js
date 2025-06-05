@@ -1,4 +1,4 @@
-const COOKIE = "<cookie>" // Replace with your actual cookie
+const COOKIE = "const COOKIE = "csrfToken=gzQ-Jw7Q0BiOs4LAr2A5seMz; browserid=W6MiPOrILH4DQih30lysV_MUjVZtzjNRSrX7-1Lkj1xissYae84t88qdxzs=; lang=en; TSID=WRUqJKGKHqjV9d7MYsxT5urHNvwDD93Y; __bid_n=197403db915e2ceff24207; g_state={"i_p":1749136684956,"i_l":1}; ndus=YqLl8i7teHuidtVOOCmNEM_aGeSpstxw5OLdIMlQ" // Replace with your actual cookie" // Replace with your actual cookie
 
 const HEADERS = {
   "Accept": "application/json, text/plain, */*",
