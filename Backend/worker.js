@@ -1,4 +1,9 @@
-const COOKIE = "csrfToken=gzQ-Jw7Q0BiOs4LAr2A5seMz; browserid=W6MiPOrILH4DQih30lysV_MUjVZtzjNRSrX7-1Lkj1xissYae84t88qdxzs=; lang=en; TSID=WRUqJKGKHqjV9d7MYsxT5urHNvwDD93Y; __bid_n=197403db915e2ceff24207; g_state={"i_p":1749136684956,"i_l":1}; ndus=YqLl8i7teHuidtVOOCmNEM_aGeSpstxw5OLdIMlQ" // Replace with your actual cookie" // Replace with your actual cookie
+//
+// ⚠️ IMPORTANT: The cookie below has been inserted for you.
+// This cookie will expire. When it does, you must replace it with a new one
+// by logging into terabox.com and copying it from your browser's developer tools (F12 -> Network).
+//
+const COOKIE = "csrfToken=gzQ-Jw7Q0BiOs4LAr2A5seMz; browserid=W6MiPOrILH4DQih30lysV_MUjVZtzjNRSrX7-1Lkj1xissYae84t88qdxzs=; lang=en; TSID=WRUqJKGKHqjV9d7MYsxT5urHNvwDD93Y; __bid_n=197403db915e2ceff24207; g_state={\"i_p\":1749136684956,\"i_l\":1}; ndus=YqLl8i7teHuidtVOOCmNEM_aGeSpstxw5OLdIMlQ";
 
 const HEADERS = {
   "Accept": "application/json, text/plain, */*",
@@ -74,7 +79,7 @@ async function getFileInfo(link, request) {
     const bdstoken = findBetween(text, 'bdstoken":"', '"');
 
     if (!jsToken || !logid || !bdstoken) {
-      return { error: "Failed to extract required tokens." };
+      return { error: "Failed to extract required tokens. Your COOKIE might be invalid or expired." };
     }
 
     const params = new URLSearchParams({
@@ -93,11 +98,11 @@ async function getFileInfo(link, request) {
       root: "1,",
     });
 
-    response = await fetch(`https://dm.terabox.app/share/list?${params}`, { headers: HEADERS });
+    response = await fetch(`https://www.terabox.app/share/list?${params}`, { headers: HEADERS });
     const data = await response.json();
 
-    if (!data || !data.list || !data.list.length || data.errno) {
-      return { error: data.errmsg || "Failed to retrieve file list." };
+    if (data.errno !== 0 || !data.list || data.list.length === 0) {
+      return { error: data.errmsg || "Failed to retrieve file list. Your COOKIE is likely expired." };
     }
 
     const fileInfo = data.list[0];
@@ -115,11 +120,15 @@ async function getFileInfo(link, request) {
 }
 
 async function proxyDownload(url, fileName, request) {
+  if (!url || url === 'undefined') {
+    return new Response(JSON.stringify({ error: "Proxy error: Invalid or missing URL. This is usually caused by an expired cookie." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  
   try {
-    // Copy headers from the original request
     const headers = new Headers(DL_HEADERS);
-    
-    // Handle range requests
     const rangeHeader = request.headers.get('Range');
     if (rangeHeader) {
       headers.set('Range', rangeHeader);
@@ -137,23 +146,10 @@ async function proxyDownload(url, fileName, request) {
       });
     }
 
-    // Copy response headers for proper streaming and seeking
-    const responseHeaders = new Headers({
-      'Cache-Control': 'public, max-age=3600',
-      'Content-Type': response.headers.get('Content-Type') || 'application/octet-stream',
-      'Content-Disposition': `inline; filename="${encodeURIComponent(fileName)}"`,
-      'Accept-Ranges': 'bytes'
-    });
-    
-    // Copy content range header if it exists (for partial content response)
-    if (response.headers.has('Content-Range')) {
-      responseHeaders.set('Content-Range', response.headers.get('Content-Range'));
-    }
-    
-    // Copy content length if it exists
-    if (response.headers.has('Content-Length')) {
-      responseHeaders.set('Content-Length', response.headers.get('Content-Length'));
-    }
+    const responseHeaders = new Headers(response.headers);
+    responseHeaders.set('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
+    responseHeaders.set('Access-Control-Allow-Origin', '*');
+    responseHeaders.set('Access-Control-Expose-Headers', 'Content-Length, Content-Range');
 
     return new Response(response.body, {
       status: response.status,
@@ -167,33 +163,23 @@ async function proxyDownload(url, fileName, request) {
   }
 }
 
-// Add CORS headers for cross-origin requests
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type,Range",
-  "Access-Control-Expose-Headers": "Content-Length,Content-Range"
 };
 
 export default {
   async fetch(request) {
-    const url = new URL(request.url);
-
-    // Handle CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: CORS_HEADERS });
     }
+    
+    const url = new URL(request.url);
 
     if (request.method === "POST" && url.pathname === "/") {
       try {
         const { link } = await request.json();
-        if (!link) {
-          return new Response(JSON.stringify({ error: "No link provided in the request body." }), {
-            status: 400,
-            headers: { "Content-Type": "application/json", ...CORS_HEADERS }
-          });
-        }
-
         const fileInfo = await getFileInfo(link, request);
         return new Response(JSON.stringify(fileInfo), {
           status: fileInfo.error ? 400 : 200,
@@ -205,26 +191,15 @@ export default {
           headers: { "Content-Type": "application/json", ...CORS_HEADERS }
         });
       }
-    }    if (request.method === "GET" && url.pathname === "/proxy") {
+    }
+    
+    if (request.method === "GET" && url.pathname === "/proxy") {
       const downloadUrl = url.searchParams.get("url");
       const fileName = url.searchParams.get("file_name") || "download";
-      if (!downloadUrl) {
-        return new Response(JSON.stringify({ error: "No URL provided for proxy." }), {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...CORS_HEADERS }
-        });
-      }
-
-      const proxyResponse = await proxyDownload(downloadUrl, fileName, request);
-      // Ensure CORS headers on proxied download response
-      proxyResponse.headers.set("Access-Control-Allow-Origin", "*");
-      proxyResponse.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-      proxyResponse.headers.set("Access-Control-Allow-Headers", "Content-Type,Range");
-      proxyResponse.headers.set("Access-Control-Expose-Headers", "Content-Length,Content-Range");
-      return proxyResponse;
+      return await proxyDownload(downloadUrl, fileName, request);
     }
 
-    return new Response(JSON.stringify({ error: "Method or path not allowed." }), {
+    return new Response(JSON.stringify({ error: "Method or path not allowed. Use POST to / for links or GET to /proxy for downloads." }), {
       status: 405,
       headers: { "Content-Type": "application/json", ...CORS_HEADERS }
     });
